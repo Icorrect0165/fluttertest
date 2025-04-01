@@ -1,9 +1,6 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# GitHub Actions workflow for Flutter CI/CD
 
-name: Dart
+name: Flutter CI
 
 on:
   push:
@@ -16,25 +13,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # Use the Flutter action instead of Dart action
-      - uses: subosito/flutter-action@v2
+      # Install Flutter with a specific version
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.19.6' # Use latest stable Flutter version
           channel: 'stable'
+          cache: true
 
+      # Ensure Dart is up to date
+      - name: Install Dart
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dart
+          dart --version
+          flutter doctor
+
+      # Get dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+      # Verify formatting (optional)
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
+      # Analyze project source
       - name: Analyze project source
         run: flutter analyze
 
-      # Run tests for Flutter projects
+      # Run Flutter tests
       - name: Run tests
         run: flutter test
